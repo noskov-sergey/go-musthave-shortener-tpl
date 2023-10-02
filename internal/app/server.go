@@ -55,7 +55,7 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Location", url)
 	body := ""
 	for k, v := range res.Header() {
-		body += fmt.Sprintf("%s: %v\r\n", k, v)
+		body += fmt.Sprintf("%s: %v\r\n", k, v[0])
 	}
 	res.Write([]byte(body))
 }
