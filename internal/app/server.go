@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -50,9 +51,13 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	res.Header().Set("Location", url)
 	res.WriteHeader(http.StatusTemporaryRedirect)
-	return
+	res.Header().Set("Location", url)
+	body := ""
+	for k, v := range res.Header() {
+		body += fmt.Sprintf("%s: %v\r\n", k, v)
+	}
+	res.Write([]byte(body))
 }
 
 func RouteRedirect(res http.ResponseWriter, req *http.Request) {
