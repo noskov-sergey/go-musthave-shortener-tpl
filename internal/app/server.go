@@ -38,7 +38,7 @@ var storage = Storage{
 func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	url := req.FormValue("url")
-	key := "http://localhost:8080/" + storage.Add(url)
+	key := ".http://localhost:8080/" + storage.Add(url)
 	res.WriteHeader(http.StatusCreated)
 	res.Write([]byte(key))
 }
