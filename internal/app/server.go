@@ -50,8 +50,9 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	res.Header().Set("Location", url)
 	res.WriteHeader(http.StatusTemporaryRedirect)
-	res.Header().Set("Location", string(url))
+	return
 }
 
 func RouteRedirect(res http.ResponseWriter, req *http.Request) {
