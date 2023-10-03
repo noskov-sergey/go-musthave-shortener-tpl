@@ -57,8 +57,7 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 	for k, v := range res.Header() {
 		body += fmt.Sprintf("%s: %v\r\n", k, v[0])
 	}
-	res.Write([]byte(body))
-	http.Redirect(res, req, url, http.StatusTemporaryRedirect)
+	return
 }
 
 func RouteRedirect(res http.ResponseWriter, req *http.Request) {
