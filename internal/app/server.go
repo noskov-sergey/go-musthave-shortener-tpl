@@ -3,6 +3,8 @@ package server
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -38,22 +40,26 @@ var storage = Storage{
 
 func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
-	url := req.URL.Query().Get("url")
-	key := "http://localhost:8080/" + storage.Add(url)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	url := string(body)
 	fmt.Printf("url из create %s", url)
+	key := "http://localhost:8080/" + storage.Add(url)
 	res.WriteHeader(http.StatusCreated)
 	res.Write([]byte(key))
 }
 
 func Redirect(res http.ResponseWriter, req *http.Request) {
 	key := strings.TrimPrefix(req.URL.Path, "/")
-	fmt.Printf("key из create %s", key)
 	url, err := storage.Get(key)
+	fmt.Printf("url из redirect %s", url)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("url из redirect %s", url)
+	res.Header().Set("Location", url)
 	http.Redirect(res, req, url, http.StatusTemporaryRedirect)
 }
 
