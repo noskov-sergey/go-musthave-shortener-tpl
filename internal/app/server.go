@@ -47,12 +47,13 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 
 func Redirect(res http.ResponseWriter, req *http.Request) {
 	key := strings.TrimPrefix(req.URL.Path, "/")
+	fmt.Printf("key из create %s", key)
 	url, err := storage.Get(key)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	res.Header().Set("Location", url)
+	fmt.Printf("url из redirect %s", url)
 	http.Redirect(res, req, url, http.StatusTemporaryRedirect)
 }
 
