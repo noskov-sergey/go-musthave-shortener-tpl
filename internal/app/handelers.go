@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -22,10 +21,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 
 func Redirect(res http.ResponseWriter, req *http.Request) {
 	key := strings.TrimPrefix(req.URL.Path, "/")
-	fmt.Printf("key из redirect %s \n", key)
 	url, err := storage.Get(key)
-	fmt.Printf("url из redirect %s \n", url)
-	fmt.Printf("err из redirect %s \n", err)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
