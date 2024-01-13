@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,6 +10,9 @@ import (
 )
 
 func TestRedirect(t *testing.T) {
+	ts := httptest.NewServer(LinkRouter())
+	defer ts.Close()
+
 	type want struct {
 		expectedCode int
 		location     string
@@ -29,24 +33,29 @@ func TestRedirect(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			new_shortkey := storage.Add(tt.existedUrl)
-			req := httptest.NewRequest(http.MethodGet, "/"+new_shortkey, nil)
+			NewShortKey, err := storage.Add(tt.existedUrl)
+			shorter := "/" + NewShortKey
+			if err != nil {
+				t.Errorf("Error. Can't add url to storage")
+			}
+			req, err := http.NewRequest(http.MethodGet, ts.URL+shorter, nil)
 			w := httptest.NewRecorder()
-			RouteRedirect(w, req)
-			res := w.Result()
-			assert.Equal(t, tt.want.expectedCode, res.StatusCode)
-			assert.Equal(t, tt.want.location, res.Header.Get("Location"))
+			Redirect(w, req)
+			resp, err := ts.Client().Do(req)
+			assert.Equal(t, tt.want.expectedCode, resp.Request.Response.StatusCode)
+			assert.Equal(t, tt.want.location, resp.Request.Response.Header.Get("Location"))
 		})
 	}
 }
 
 func TestCreateRedirect(t *testing.T) {
+	ts := httptest.NewServer(LinkRouter())
+	defer ts.Close()
+
 	type want struct {
-		expectedCode  int
-		location      string
-		contenttype   string
-		contentlength int64
-		proto         string
+		expectedCode int
+		location     string
+		proto        string
 	}
 	tests := []struct {
 		name   string
@@ -57,22 +66,24 @@ func TestCreateRedirect(t *testing.T) {
 			name:   "test for CreateRedirect true",
 			reqUrl: "/",
 			want: want{
-				expectedCode:  201,
-				location:      "https://www.e1.ru/",
-				contenttype:   "text/plain",
-				contentlength: 30,
-				proto:         "HTTP/1.1",
+				expectedCode: 201,
+				location:     "https://www.e1.ru/",
+				proto:        "HTTP/1.1",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bodyReader := strings.NewReader("https://www.e1.ru/")
-			r := httptest.NewRequest(http.MethodPost, tt.reqUrl, bodyReader)
+			r := httptest.NewRequest(http.MethodPost, ts.URL+tt.reqUrl, strings.NewReader("https://www.e1.ru/"))
 			w := httptest.NewRecorder()
-			RouteRedirect(w, r)
+			CreateRedirect(w, r)
 			res := w.Result()
+			defer res.Body.Close()
+			body, _ := io.ReadAll(res.Body)
+			shortLink := strings.ReplaceAll(string(body), "http://localhost:8080/", "")
+			url1, _ := storage.Get(shortLink)
 			assert.Equal(t, tt.want.proto, res.Proto)
+			assert.Equal(t, tt.want.location, url1)
 			assert.Equal(t, tt.want.expectedCode, res.StatusCode)
 		})
 	}

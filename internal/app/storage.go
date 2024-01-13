@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 )
 
@@ -19,14 +20,17 @@ func newStorage() *Storage {
 
 var storage = newStorage()
 
-func (c *Storage) Add(url string) string {
+func (c *Storage) Add(url string) (string, error) {
 	short := make([]rune, 8)
 	for i := range short {
 		short[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	key := string(short)
 	c.links[key] = url
-	return key
+	if c.links[key] != url {
+		fmt.Println("Error for Add key to storage")
+	}
+	return key, nil
 }
 
 func (c *Storage) Get(key string) (string, error) {

@@ -5,6 +5,5 @@ import (
 )
 
 func RunServer() {
-	http.HandleFunc("/", RouteRedirect)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", LinkRouter())
 }
