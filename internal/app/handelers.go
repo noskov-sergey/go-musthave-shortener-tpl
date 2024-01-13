@@ -16,7 +16,6 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	req.Body.Close()
 	url := string(body)
 	if url == "" {
-		log.Fatalln("should be not empty data")
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
