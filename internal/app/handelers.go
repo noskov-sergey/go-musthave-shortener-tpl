@@ -35,5 +35,4 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("Location", url)
 	res.WriteHeader(http.StatusTemporaryRedirect)
-	return
 }
