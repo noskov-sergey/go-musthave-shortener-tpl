@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"io"
 	"log"
@@ -17,7 +16,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	req.Body.Close()
 	url := string(body)
 	if url == "" {
-		fmt.Errorf("No real data in body")
+		log.Fatalln("should be not empty data")
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
