@@ -43,10 +43,10 @@ func TestRedirect(t *testing.T) {
 				t.Errorf("Error. Can't add url to storage")
 			}
 			resp, err := ts.Client().Do(req)
-			defer resp.Body.Close()
 			if err != nil {
 				t.Errorf("Error. Can't add url to storage")
 			}
+			defer resp.Body.Close()
 			assert.Equal(t, tt.want.expectedCode, resp.Request.Response.StatusCode)
 			assert.Equal(t, tt.want.location, resp.Request.Response.Header.Get("Location"))
 		})
