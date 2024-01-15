@@ -15,6 +15,10 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	}
 	req.Body.Close()
 	url := string(body)
+	if url == "" {
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	shortkey, err := storage.Add(url)
 	if err != nil {
 		log.Fatalln(err)

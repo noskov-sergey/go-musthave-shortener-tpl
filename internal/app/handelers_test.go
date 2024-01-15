@@ -18,13 +18,13 @@ func TestRedirect(t *testing.T) {
 		location     string
 	}
 	tests := []struct {
-		name       string
-		existedUrl string
-		want       want
+		name    string
+		existed string
+		want    want
 	}{
 		{
-			name:       "Redirect func test for true",
-			existedUrl: "https://www.e1.ru/",
+			name:    "Redirect func test for true",
+			existed: "https://www.e1.ru/",
 			want: want{
 				expectedCode: 307,
 				location:     "https://www.e1.ru/",
@@ -33,7 +33,7 @@ func TestRedirect(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewShortKey, err := storage.Add(tt.existedUrl)
+			NewShortKey, err := storage.Add(tt.existed)
 			shorter := "/" + NewShortKey
 			if err != nil {
 				t.Errorf("Error. Can't add url to storage")
@@ -63,23 +63,35 @@ func TestCreateRedirect(t *testing.T) {
 		proto        string
 	}
 	tests := []struct {
-		name   string
-		reqUrl string
-		want   want
+		name        string
+		req         string
+		linkForBody string
+		want        want
 	}{
 		{
-			name:   "test for CreateRedirect true",
-			reqUrl: "/",
+			name:        "test for CreateRedirect - worked data",
+			req:         "/",
+			linkForBody: "https://www.e1.ru/",
 			want: want{
 				expectedCode: 201,
 				location:     "https://www.e1.ru/",
 				proto:        "HTTP/1.1",
 			},
 		},
+		{
+			name:        "test for CreateRedirect - empty data",
+			req:         "/",
+			linkForBody: "",
+			want: want{
+				expectedCode: 400,
+				location:     "",
+				proto:        "HTTP/1.1",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodPost, ts.URL+tt.reqUrl, strings.NewReader("https://www.e1.ru/"))
+			r := httptest.NewRequest(http.MethodPost, ts.URL+tt.req, strings.NewReader(tt.linkForBody))
 			w := httptest.NewRecorder()
 			CreateRedirect(w, r)
 			res := w.Result()
