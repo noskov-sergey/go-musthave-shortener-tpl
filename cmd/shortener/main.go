@@ -1,9 +1,12 @@
 package main
 
 import (
-	shortener "go-musthave-shortener-tpl/internal/app"
+	"go-musthave-shortener-tpl/internal/app"
 )
 
 func main() {
-	shortener.Run()
+	parseFlags(params)
+	if err := server.RunServer(params); err != nil {
+		panic(err)
+	}
 }

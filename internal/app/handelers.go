@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/go-chi/chi/v5"
+	"go-musthave-shortener-tpl/internal/app/config"
 	"io"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	key := "http://localhost:8080/" + shortkey
+	key := config.BaseUrla + shortkey
 	res.Header().Add("Content-Type", "text/plain")
 	res.Header().Add("Content-Length", strconv.Itoa(len(key)))
 	res.WriteHeader(http.StatusCreated)
