@@ -15,8 +15,8 @@ type NetAddress struct {
 
 func NewNetAddress() *NetAddress {
 	return &NetAddress{
-		Host: "",
-		Port: 0,
+		Host: "localhost",
+		Port: 8000,
 	}
 }
 
