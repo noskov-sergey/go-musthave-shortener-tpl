@@ -10,6 +10,6 @@ var params = config.NewNetAddress()
 func parseFlags(p *config.NetAddress) {
 	_ = flag.Value(p)
 	flag.Var(p, "a", "address and port to run server")
-	flag.StringVar(&config.BaseUrla, "b", "http://localhost:8000/", "base url for short link server")
+	flag.StringVar(&config.BaseUrla, "b", "http://localhost:8080/", "base url for short link server")
 	flag.Parse()
 }
