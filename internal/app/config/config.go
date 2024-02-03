@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var BaseUrl string
+var BaseUrl string = "http://localhost:8080/"
 
 type NetAddress struct {
 	Host string
