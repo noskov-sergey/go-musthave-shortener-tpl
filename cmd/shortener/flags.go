@@ -19,7 +19,7 @@ func parseFlags(p *config.NetAddress) {
 		// разбиваем значение флага на слайс строк через запятую
 		// и заливаем в переменную
 		re := regexp.MustCompile(`([a-z]*)://([a-z]*):([0-9]*)`)
-		config.BaseUrl = re.FindString(flagValue) + "/"
+		config.BaseURL = re.FindString(flagValue) + "/"
 		return nil
 	})
 	flag.Parse()
@@ -39,6 +39,6 @@ func parseFlags(p *config.NetAddress) {
 
 	if envBaseAddr := os.Getenv("BASE_URL"); envBaseAddr != "" {
 		re := regexp.MustCompile(`([a-z]*)://([a-z]*):([0-9]*)`)
-		config.BaseUrl = re.FindString(envBaseAddr) + "/"
+		config.BaseURL = re.FindString(envBaseAddr) + "/"
 	}
 }

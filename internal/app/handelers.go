@@ -24,7 +24,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	key := config.BaseUrl + shortkey
+	key := config.BaseURL + shortkey
 	res.Header().Add("Content-Type", "text/plain")
 	res.Header().Add("Content-Length", strconv.Itoa(len(key)))
 	res.WriteHeader(http.StatusCreated)
