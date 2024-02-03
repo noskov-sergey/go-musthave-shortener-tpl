@@ -23,6 +23,7 @@ func parseFlags(p *config.NetAddress) {
 		return nil
 	})
 	flag.Parse()
+
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
 		hp := strings.Split(envRunAddr, ":")
 		if len(hp) != 2 {
@@ -35,6 +36,7 @@ func parseFlags(p *config.NetAddress) {
 		params.Host = hp[0]
 		params.Port = port
 	}
+
 	if envBaseAddr := os.Getenv("BASE_URL"); envBaseAddr != "" {
 		re := regexp.MustCompile(`([a-z]*)://([a-z]*):([0-9]*)`)
 		config.BaseUrl = re.FindString(envBaseAddr) + "/"
