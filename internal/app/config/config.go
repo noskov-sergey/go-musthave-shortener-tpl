@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var BaseUrla string
+var BaseUrl string
 
 type NetAddress struct {
 	Host string
