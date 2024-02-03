@@ -1,9 +1,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"go-musthave-shortener-tpl/internal/app/config"
+	"os"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 var params = config.NewNetAddress()
@@ -19,4 +23,20 @@ func parseFlags(p *config.NetAddress) {
 		return nil
 	})
 	flag.Parse()
+	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
+		hp := strings.Split(envRunAddr, ":")
+		if len(hp) != 2 {
+			errors.New("need address in a form host:port")
+		}
+		port, err := strconv.Atoi(hp[1])
+		if err != nil {
+			panic(err)
+		}
+		params.Host = hp[0]
+		params.Port = port
+	}
+	if envBaseAddr := os.Getenv("BASE_URL"); envBaseAddr != "" {
+		re := regexp.MustCompile(`([a-z]*)://([a-z]*):([0-9]*)`)
+		config.BaseUrl = re.FindString(envBaseAddr) + "/"
+	}
 }
