@@ -57,7 +57,7 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if err = json.Unmarshal(buf.Bytes(), &requestAPI); err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	shortKey, err := storage.Add(requestAPI.URI)
