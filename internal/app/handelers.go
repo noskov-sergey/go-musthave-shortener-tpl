@@ -1,8 +1,11 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"go-musthave-shortener-tpl/internal/app/config"
+	"go-musthave-shortener-tpl/internal/app/models"
 	"io"
 	"log"
 	"net/http"
@@ -40,4 +43,36 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("Location", url)
 	res.WriteHeader(http.StatusTemporaryRedirect)
+}
+
+func APIShorten(res http.ResponseWriter, req *http.Request) {
+	var buf bytes.Buffer
+	var requestAPI models.RequestShorten
+	var responsAPI models.ResponseShorten
+
+	_, err := buf.ReadFrom(req.Body)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = json.Unmarshal(buf.Bytes(), &requestAPI); err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	shortKey, err := storage.Add(requestAPI.URI)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	responsAPI.Result = config.BaseURL + shortKey
+
+	resp, err := json.Marshal(responsAPI)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusCreated)
+	res.Write(resp)
 }
