@@ -1,8 +1,8 @@
 package main
 
 import (
+	"errors"
 	"flag"
-	"fmt"
 	"go-musthave-shortener-tpl/internal/app/config"
 	"os"
 	"regexp"
@@ -27,7 +27,7 @@ func parseFlags(p *config.NetAddress) {
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
 		hp := strings.Split(envRunAddr, ":")
 		if len(hp) != 2 {
-			fmt.Errorf("need address in a form host:port")
+			errors.New("need address in a form host:port")
 		}
 		port, err := strconv.Atoi(hp[1])
 		if err != nil {
