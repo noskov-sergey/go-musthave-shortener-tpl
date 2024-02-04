@@ -105,3 +105,7 @@ func TestCreateRedirect(t *testing.T) {
 		})
 	}
 }
+
+func TestAPIShorten(t *testing.T) {
+	return
+}

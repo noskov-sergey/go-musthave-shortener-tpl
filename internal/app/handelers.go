@@ -45,10 +45,10 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func ApiShorten(res http.ResponseWriter, req *http.Request) {
+func APIShorten(res http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
-	var requestApi models.RequestShorten
-	var responsApi models.ResponseShorten
+	var requestAPI models.RequestShorten
+	var responsAPI models.ResponseShorten
 
 	_, err := buf.ReadFrom(req.Body)
 	if err != nil {
@@ -56,17 +56,21 @@ func ApiShorten(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err = json.Unmarshal(buf.Bytes(), &requestApi); err != nil {
+	if err = json.Unmarshal(buf.Bytes(), &requestAPI); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	shortkey, err := storage.Add(requestApi.Url)
+	shortkey, err := storage.Add(requestAPI.Uri)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	responsApi.Result = config.BaseURL + shortkey
+	responsAPI.Result = config.BaseURL + shortkey
 
-	resp, err := json.Marshal(responsApi)
+	resp, err := json.Marshal(responsAPI)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
