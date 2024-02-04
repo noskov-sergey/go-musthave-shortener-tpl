@@ -36,19 +36,19 @@ func TestRedirect(t *testing.T) {
 			NewShortKey, err := storage.Add(tt.existed)
 			shorter := "/" + NewShortKey
 			if err != nil {
-				t.Errorf("Error. Can't add url to storage")
+				t.Errorf("Error. Can't get short uri from storage")
 			}
 			req, err := http.NewRequest(http.MethodGet, ts.URL+shorter, nil)
 			if err != nil {
-				t.Errorf("Error. Can't add url to storage")
+				t.Errorf("Error. Can't make request")
 			}
 			resp, err := ts.Client().Do(req)
 			if err != nil {
-				t.Errorf("Error. Can't add url to storage")
+				t.Errorf("Error. After trying to get response %s", err)
 			}
-			defer resp.Body.Close()
 			assert.Equal(t, tt.want.expectedCode, resp.Request.Response.StatusCode)
 			assert.Equal(t, tt.want.location, resp.Request.Response.Header.Get("Location"))
+			resp.Body.Close()
 		})
 	}
 }

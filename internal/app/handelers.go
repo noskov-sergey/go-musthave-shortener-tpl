@@ -60,11 +60,11 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	shortkey, err := storage.Add(requestAPI.Uri)
+	shortKey, err := storage.Add(requestAPI.Uri)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	responsAPI.Result = config.BaseURL + shortkey
+	responsAPI.Result = config.BaseURL + shortKey
 
 	resp, err := json.Marshal(responsAPI)
 	if err != nil {
