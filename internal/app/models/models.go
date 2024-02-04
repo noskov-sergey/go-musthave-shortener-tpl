@@ -1,7 +1,7 @@
 package models
 
 type RequestShorten struct {
-	Uri string `json:"url"`
+	URI string `json:"url"`
 }
 
 type ResponseShorten struct {
