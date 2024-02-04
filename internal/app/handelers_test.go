@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/stretchr/testify/assert"
+	"go-musthave-shortener-tpl/internal/app/logger"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 )
 
 func TestRedirect(t *testing.T) {
+	logger.Initialize()
 	ts := httptest.NewServer(LinkRouter())
 	defer ts.Close()
 

@@ -47,8 +47,7 @@ func Redirect(res http.ResponseWriter, req *http.Request) {
 
 func APIShorten(res http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
-	var requestAPI models.RequestShorten
-	var responsAPI models.ResponseShorten
+	var shortenAPI models.ShortenAPI
 
 	_, err := buf.ReadFrom(req.Body)
 	if err != nil {
@@ -56,17 +55,17 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err = json.Unmarshal(buf.Bytes(), &requestAPI); err != nil {
+	if err = json.Unmarshal(buf.Bytes(), &shortenAPI); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	shortKey, err := storage.Add(requestAPI.URI)
+	shortKey, err := storage.Add(shortenAPI.URI)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	responsAPI.Result = config.BaseURL + shortKey
+	shortenAPI.Result = config.BaseURL + shortKey
 
-	resp, err := json.Marshal(responsAPI)
+	resp, err := json.Marshal(shortenAPI)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

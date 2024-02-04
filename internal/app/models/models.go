@@ -1,9 +1,6 @@
 package models
 
-type RequestShorten struct {
-	URI string `json:"url"`
-}
-
-type ResponseShorten struct {
+type ShortenAPI struct {
+	URI    string `json:"-"`
 	Result string `json:"result"`
 }
