@@ -60,7 +60,7 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	shortKey, err := storage.Add(requestAPI.Uri)
+	shortKey, err := storage.Add(requestAPI.URI)
 	if err != nil {
 		log.Fatalln(err)
 	}
