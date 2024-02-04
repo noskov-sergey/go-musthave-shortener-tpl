@@ -27,7 +27,7 @@ func parseFlags(p *config.NetAddress) {
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
 		hp := strings.Split(envRunAddr, ":")
 		if len(hp) != 2 {
-			errors.New("need address in a form host:port")
+			panic(errors.New("need address in a form host:port"))
 		}
 		port, err := strconv.Atoi(hp[1])
 		if err != nil {
