@@ -6,7 +6,19 @@ import (
 	"strings"
 )
 
-var BaseURL string = "http://localhost:8080/"
+var BaseURL string = "http://localhost:8081/"
+
+type Backup struct {
+	BaseFile string
+	W        int
+}
+
+func NewFileParams() *Backup {
+	return &Backup{
+		BaseFile: "/tmp/short-url-db.json",
+		W:        0,
+	}
+}
 
 type NetAddress struct {
 	Host string
@@ -16,7 +28,7 @@ type NetAddress struct {
 func NewNetAddress() *NetAddress {
 	return &NetAddress{
 		Host: "localhost",
-		Port: 8080,
+		Port: 8081,
 	}
 }
 
