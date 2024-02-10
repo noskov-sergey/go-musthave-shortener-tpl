@@ -1,8 +1,11 @@
 package server
 
 import (
+	"encoding/json"
+	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"go-musthave-shortener-tpl/internal/app/logger"
+	"go-musthave-shortener-tpl/internal/app/models"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -109,4 +112,87 @@ func TestCreateRedirect(t *testing.T) {
 }
 
 func TestAPIShorten(t *testing.T) {
+	logger.Initialize()
+	ts := httptest.NewServer(LinkRouter())
+	defer ts.Close()
+
+	var resAPI models.ResponseShorten
+
+	exampleBody := `{
+  		"url": "https://practicum.yandex.ru"
+	}`
+	exampleLink := "https://practicum.yandex.ru"
+
+	testCases := []struct {
+		name         string // добавляем название тестов
+		method       string
+		body         string // добавляем тело запроса в табличные тесты
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			name:         "method_get",
+			method:       http.MethodGet,
+			expectedCode: http.StatusMethodNotAllowed,
+			expectedBody: "",
+		},
+		{
+			name:         "method_put",
+			method:       http.MethodPut,
+			expectedCode: http.StatusMethodNotAllowed,
+			expectedBody: "",
+		},
+		{
+			name:         "method_delete",
+			method:       http.MethodDelete,
+			expectedCode: http.StatusMethodNotAllowed,
+			expectedBody: "",
+		},
+		{
+			name:         "method_post_without_body",
+			method:       http.MethodPost,
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: "",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.method, func(t *testing.T) {
+			req := resty.New().R()
+			req.Method = tc.method
+			req.URL = ts.URL + "/api/shorten"
+
+			if len(tc.body) > 0 {
+				req.SetHeader("Content-Type", "application/json")
+				req.SetBody(tc.body)
+			}
+
+			resp, err := req.Send()
+			assert.NoError(t, err, "error making HTTP request")
+			assert.Equal(t, tc.expectedCode, resp.StatusCode(), "Response code didn't match expected")
+		})
+	}
+	t.Run("Post method full check", func(t *testing.T) {
+		req := resty.New().R()
+		req.Method = http.MethodPost
+		req.URL = ts.URL + "/api/shorten"
+		req.SetHeader("Content-Type", "application/json")
+		req.SetBody(exampleBody)
+		resp, err := req.Send()
+
+		assert.NoError(t, err, "error making HTTP request")
+		assert.Equal(t, http.StatusCreated, resp.StatusCode(), "Response code didn't match expected")
+
+		json.Unmarshal(resp.Body(), &resAPI)
+
+		reqnext := resty.New().R()
+		reqnext.Method = http.MethodGet
+		reqnext.URL = ts.URL + resAPI.Result[21:]
+		respAPI, err := reqnext.Send()
+
+		uri, _ := storage.Get(resAPI.Result[22:])
+
+		assert.Equal(t, uri, exampleLink, "error with link")
+		assert.NoError(t, err, "error making HTTP request")
+		assert.Equal(t, http.StatusTemporaryRedirect, respAPI.RawResponse.Request.Response.Request.Response.StatusCode, "Response code didn't match expected")
+	})
 }

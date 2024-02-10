@@ -20,6 +20,7 @@ func newCompressWriter(w http.ResponseWriter) *compressWriter {
 }
 
 func (c *compressWriter) Header() http.Header {
+	c.w.Header().Add("Content-Encoding", "gzip")
 	return c.w.Header()
 }
 
@@ -81,7 +82,7 @@ func GzipMiddleware() func(next http.Handler) http.Handler {
 
 			contentEncoding := r.Header.Get("Content-Encoding")
 			sendsGzip := strings.Contains(contentEncoding, "gzip")
-			if sendsGzip && (sendsTypeGzip || sendsTextGzip) {
+			if sendsGzip {
 				cr, err := newCompressReader(r.Body)
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
