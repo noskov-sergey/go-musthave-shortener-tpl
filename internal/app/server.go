@@ -21,7 +21,6 @@ func RunServer(params *config.NetAddress) error {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
 		<-sigint
-
 		if err := srv.Shutdown(context.Background()); err != nil {
 			log.Printf("HTTP server Shutdown: %v", err)
 		}

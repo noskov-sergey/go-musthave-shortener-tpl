@@ -15,9 +15,19 @@ type Backup struct {
 
 func NewFileParams() *Backup {
 	return &Backup{
-		BaseFile: "/tmp/short-url-db.json",
+		BaseFile: "D:/DevGO/go-musthave-shortener-tpl/tmp/short-url-db.json",
 		W:        0,
 	}
+}
+
+func (b *Backup) String() string {
+	return b.BaseFile
+}
+
+func (b *Backup) Set(src string) error {
+	b.BaseFile = src
+	b.W = 1
+	return nil
 }
 
 type NetAddress struct {

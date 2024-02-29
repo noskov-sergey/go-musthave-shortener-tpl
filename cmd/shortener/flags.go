@@ -13,7 +13,7 @@ import (
 var params = config.NewNetAddress()
 var fileparams = config.NewFileParams()
 
-func parseFlags(p *config.NetAddress) {
+func parseFlags(p *config.NetAddress, s *config.Backup) {
 	_ = flag.Value(p)
 	flag.Var(p, "a", "address and port to run server")
 	flag.Func("b", "base url for short link server", func(flagValue string) error {
@@ -21,11 +21,7 @@ func parseFlags(p *config.NetAddress) {
 		config.BaseURL = re.FindString(flagValue) + "/"
 		return nil
 	})
-	flag.Func("f", "base file address for json base", func(flagValue string) error {
-		fileparams.BaseFile = flagValue
-		fileparams.W = 1
-		return nil
-	})
+	flag.Var(s, "f", "base file address for json base")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
@@ -37,8 +33,8 @@ func parseFlags(p *config.NetAddress) {
 		if err != nil {
 			panic(err)
 		}
-		params.Host = hp[0]
-		params.Port = port
+		p.Host = hp[0]
+		p.Port = port
 	}
 
 	if envBaseAddr := os.Getenv("BASE_URL"); envBaseAddr != "" {
@@ -47,7 +43,6 @@ func parseFlags(p *config.NetAddress) {
 	}
 
 	if envFileStorage := os.Getenv("FILE_STORAGE_PATH"); envFileStorage != "" {
-		fileparams.BaseFile = envFileStorage
-		fileparams.W = 1
+		s.Set(envFileStorage)
 	}
 }
