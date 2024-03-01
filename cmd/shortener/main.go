@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "go-musthave-shortener-tpl/internal/app"
+	serv "go-musthave-shortener-tpl/internal/app"
 	storage "go-musthave-shortener-tpl/internal/app/backup"
 	"go-musthave-shortener-tpl/internal/app/config"
 	"log"
@@ -17,10 +17,10 @@ func main() {
 	defer Consumer.Close()
 	err = Consumer.ReadFile()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err, "error from main with ReadFile")
 	}
 
-	if errServ := RunServer(params); errServ != nil {
+	if errServ := serv.RunServer(params); errServ != nil {
 		panic(errServ)
 	}
 }
