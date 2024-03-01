@@ -9,6 +9,7 @@ import (
 
 func main() {
 	parseFlags(params, config.Fileparams)
+
 	Consumer, err := storage.NewReader(config.Fileparams.String())
 	if err != nil {
 		log.Fatal(err)
