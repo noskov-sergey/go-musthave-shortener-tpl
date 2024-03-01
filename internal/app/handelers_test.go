@@ -1,9 +1,10 @@
-package server
+package storage
 
 import (
 	"encoding/json"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
+	"go-musthave-shortener-tpl/internal/app/backup"
 	"go-musthave-shortener-tpl/internal/app/logger"
 	"go-musthave-shortener-tpl/internal/app/models"
 	"io"
@@ -38,7 +39,7 @@ func TestRedirect(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewShortKey, err := storage.Add(tt.existed)
+			NewShortKey, err := storage.RealStorage.Add(tt.existed)
 			shorter := "/" + NewShortKey
 			if err != nil {
 				t.Errorf("Error. Can't get short uri from storage")
@@ -103,7 +104,7 @@ func TestCreateRedirect(t *testing.T) {
 			defer res.Body.Close()
 			body, _ := io.ReadAll(res.Body)
 			shortLink := strings.ReplaceAll(string(body), "http://localhost:8080/", "")
-			url1, _ := storage.Get(shortLink)
+			url1, _ := storage.RealStorage.Get(shortLink)
 			assert.Equal(t, tt.want.proto, res.Proto)
 			assert.Equal(t, tt.want.location, url1)
 			assert.Equal(t, tt.want.expectedCode, res.StatusCode)
@@ -189,7 +190,7 @@ func TestAPIShorten(t *testing.T) {
 		reqnext.URL = ts.URL + resAPI.Result[21:]
 		respAPI, err := reqnext.Send()
 
-		uri, _ := storage.Get(resAPI.Result[22:])
+		uri, _ := storage.RealStorage.Get(resAPI.Result[22:])
 
 		assert.Equal(t, uri, exampleLink, "error with link")
 		assert.NoError(t, err, "error making HTTP request")

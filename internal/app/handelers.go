@@ -1,9 +1,10 @@
-package server
+package storage
 
 import (
 	"bytes"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"go-musthave-shortener-tpl/internal/app/backup"
 	"go-musthave-shortener-tpl/internal/app/config"
 	"go-musthave-shortener-tpl/internal/app/models"
 	"io"
@@ -23,7 +24,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	shortkey, err := storage.Add(url)
+	shortkey, err := storage.RealStorage.Add(url)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -36,7 +37,7 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 
 func Redirect(res http.ResponseWriter, req *http.Request) {
 	key := chi.URLParam(req, "shortlink")
-	url, err := storage.Get(key)
+	url, err := storage.RealStorage.Get(key)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
@@ -60,7 +61,7 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	shortKey, err := storage.Add(requestAPI.URI)
+	shortKey, err := storage.RealStorage.Add(requestAPI.URI)
 	if err != nil {
 		log.Fatalln(err)
 	}

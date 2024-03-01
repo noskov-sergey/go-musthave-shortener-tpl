@@ -1,4 +1,4 @@
-package server
+package storage
 
 import (
 	"github.com/go-chi/chi/v5"
