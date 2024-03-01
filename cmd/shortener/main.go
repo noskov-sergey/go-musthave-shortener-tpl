@@ -9,15 +9,16 @@ import (
 
 func main() {
 	parseFlags(params, config.Fileparams)
-
-	Consumer, err := storage.NewReader(config.Fileparams.String())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer Consumer.Close()
-	err = Consumer.ReadFile()
-	if err != nil {
-		log.Fatal(err, "error from main with ReadFile")
+	if config.Fileparams.W == 1 {
+		Consumer, err := storage.NewReader(config.Fileparams.String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer Consumer.Close()
+		err = Consumer.ReadFile()
+		if err != nil {
+			log.Fatal(err, "error from main with ReadFile")
+		}
 	}
 
 	if errServ := serv.RunServer(params); errServ != nil {
