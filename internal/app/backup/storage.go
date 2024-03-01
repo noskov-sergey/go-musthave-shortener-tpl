@@ -54,7 +54,7 @@ func (c *Storage) Get(key string) (string, error) {
 	return url, nil
 }
 
-func (c *Storage) ReadBackup(uri string, originalUri string) error {
-	c.links[uri] = originalUri
+func (c *Storage) ReadBackup(uri string, originalURI string) error {
+	c.links[uri] = originalURI
 	return nil
 }

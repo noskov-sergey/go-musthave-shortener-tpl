@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"go-musthave-shortener-tpl/internal/app/models"
 	"log"
 	"os"
@@ -43,7 +44,7 @@ func (w *Writer) WriteData(key, url string) error {
 		log.Fatal(err)
 		return err
 	}
-	return w.writer.Flush()
+	w.writer.Flush()
 	return nil
 }
 
@@ -72,6 +73,9 @@ func (c *Reader) ReadFile() error {
 	for c.scanner.Scan() {
 		backupData := models.BackupModel{}
 		line := c.scanner.Bytes()
+		if len(line) == 0 {
+			return errors.New("file is clear")
+		}
 		err := json.Unmarshal(line, &backupData)
 		if err != nil {
 			return err
