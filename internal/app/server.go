@@ -15,6 +15,7 @@ func RunServer(params *config.NetAddress) error {
 	if err := logger.Initialize(); err != nil {
 		return err
 	}
+
 	logger.Sugar.Info("Running server", zap.String("address", params.String()))
 
 	return srv.ListenAndServe()
