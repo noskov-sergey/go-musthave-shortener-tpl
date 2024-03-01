@@ -1,62 +1,89 @@
-package backup
+package storage
 
 import (
+	"bufio"
 	"encoding/json"
-	server "go-musthave-shortener-tpl/internal/app"
+	"go-musthave-shortener-tpl/internal/app/models"
+	"log"
 	"os"
 )
 
-type Producer struct {
-	file    *os.File
-	encoder *json.Encoder
+type Writer struct {
+	file   *os.File
+	writer *bufio.Writer
 }
 
-func NewProducer(fileName string) (*Producer, error) {
+func NewWriter(fileName string) (*Writer, error) {
 	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Producer{
-		file:    file,
-		encoder: json.NewEncoder(file),
+	return &Writer{
+		file:   file,
+		writer: bufio.NewWriter(file),
 	}, nil
 }
 
-func (p *Producer) WriteData(storage *server.Storage) error {
-	return p.encoder.Encode(&storage)
+func (w *Writer) WriteData(key, url string) error {
+	line := models.BackupModel{
+		URI:         key,
+		OriginalUri: url,
+	}
+	data, err := json.Marshal(&line)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	if _, err = w.writer.Write(data); err != nil {
+		log.Fatal(err)
+		return err
+	}
+	if err = w.writer.WriteByte('\n'); err != nil {
+		log.Fatal(err)
+		return err
+	}
+	return w.writer.Flush()
+	return nil
 }
 
-func (p *Producer) Close() error {
-	return p.file.Close()
+func (w *Writer) Close() error {
+	return w.file.Close()
 }
 
-type Consumer struct {
+type Reader struct {
 	file    *os.File
-	decoder *json.Decoder
+	scanner *bufio.Scanner
 }
 
-func NewConsumer(fileName string) (*Consumer, error) {
+func NewReader(fileName string) (*Reader, error) {
 	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Consumer{
+	return &Reader{
 		file:    file,
-		decoder: json.NewDecoder(file),
+		scanner: bufio.NewScanner(file),
 	}, nil
 }
 
-func (c *Consumer) ReadEvent() (*server.Storage, error) {
-	storage := &server.Storage{}
-	if err := c.decoder.Decode(&storage); err != nil {
-		return nil, err
+func (c *Reader) ReadFile() error {
+	for c.scanner.Scan() {
+		backupData := models.BackupModel{}
+		line := c.scanner.Bytes()
+		err := json.Unmarshal(line, &backupData)
+		if err != nil {
+			return err
+		}
+		err = RealStorage.ReadBackup(backupData.URI, backupData.OriginalUri)
+		if err != nil {
+			return err
+		}
 	}
-
-	return storage, nil
+	return nil
 }
 
-func (c *Consumer) Close() error {
+func (c *Reader) Close() error {
 	return c.file.Close()
 }

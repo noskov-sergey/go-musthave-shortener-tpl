@@ -1,27 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"go-musthave-shortener-tpl/internal/app"
-	"go-musthave-shortener-tpl/internal/app/backup"
+	. "go-musthave-shortener-tpl/internal/app"
+	storage "go-musthave-shortener-tpl/internal/app/backup"
+	"go-musthave-shortener-tpl/internal/app/config"
 	"log"
 )
 
 func main() {
-	parseFlags(params, fileparams)
+	parseFlags(params, config.Fileparams)
 
-	Consumer, err := backup.NewConsumer(fileparams.String())
+	Consumer, err := storage.NewReader(config.Fileparams.String())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer Consumer.Close()
-	readEvent, err := Consumer.ReadEvent()
+	err = Consumer.ReadFile()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(readEvent)
 
-	if err1 := server.RunServer(params); err != nil {
-		panic(err1)
+	if errServ := RunServer(params); errServ != nil {
+		panic(errServ)
 	}
 }

@@ -7,6 +7,7 @@ import (
 )
 
 var BaseURL string = "http://localhost:8080/"
+var Fileparams = NewFileParams()
 
 type Backup struct {
 	BaseFile string
@@ -15,7 +16,7 @@ type Backup struct {
 
 func NewFileParams() *Backup {
 	return &Backup{
-		BaseFile: "D:/DevGO/go-musthave-shortener-tpl/tmp/short-url-db.json",
+		BaseFile: "./tmp/short-url-db.json",
 		W:        0,
 	}
 }

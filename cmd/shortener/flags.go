@@ -11,7 +11,6 @@ import (
 )
 
 var params = config.NewNetAddress()
-var fileparams = config.NewFileParams()
 
 func parseFlags(p *config.NetAddress, s *config.Backup) {
 	_ = flag.Value(p)
