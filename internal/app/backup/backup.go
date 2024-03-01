@@ -28,7 +28,7 @@ func NewWriter(fileName string) (*Writer, error) {
 func (w *Writer) WriteData(key, url string) error {
 	line := models.BackupModel{
 		URI:         key,
-		OriginalUri: url,
+		OriginalURI: url,
 	}
 	data, err := json.Marshal(&line)
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *Reader) ReadFile() error {
 		if err != nil {
 			return err
 		}
-		err = RealStorage.ReadBackup(backupData.URI, backupData.OriginalUri)
+		err = RealStorage.ReadBackup(backupData.URI, backupData.OriginalURI)
 		if err != nil {
 			return err
 		}

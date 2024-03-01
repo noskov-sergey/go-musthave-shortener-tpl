@@ -10,5 +10,5 @@ type ResponseShorten struct {
 
 type BackupModel struct {
 	URI         string `json:"short_url"`
-	OriginalUri string `json:"original_url"`
+	OriginalURI string `json:"original_url"`
 }
