@@ -21,17 +21,19 @@ func main() {
 		log.Fatal(err, "error from main with ReadFile")
 	}
 
-	db, err := sql.Open("pgx", config.DBConf.Config)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	if config.DBConf.String() != "" {
+		db, err := sql.Open("pgx", config.DBConf.Config)
+		if err != nil {
+			panic(err)
+		}
+		defer db.Close()
 
-	config.DB = db
+		config.DB = db
 
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err, "mysql connection failed!")
+		err = db.Ping()
+		if err != nil {
+			log.Fatal(err, "mysql connection failed!")
+		}
 	}
 
 	if errServ := serv.RunServer(params); errServ != nil {
