@@ -1,13 +1,16 @@
 package config
 
 import (
+	"database/sql"
 	"errors"
 	"strconv"
 	"strings"
 )
 
-var BaseURL string = "http://localhost:8080/"
+var BaseURL = "http://localhost:8080/"
 var Fileparams = NewFileParams()
+var DBConf = NewDataBase()
+var DB *sql.DB
 
 type Backup struct {
 	BaseFile string
@@ -58,5 +61,24 @@ func (n *NetAddress) Set(src string) error {
 	}
 	n.Host = hp[0]
 	n.Port = port
+	return nil
+}
+
+type DataBase struct {
+	Config string
+}
+
+func NewDataBase() *DataBase {
+	return &DataBase{
+		Config: "",
+	}
+}
+
+func (n *DataBase) String() string {
+	return n.Config
+}
+
+func (n *DataBase) Set(src string) error {
+	n.Config = src
 	return nil
 }

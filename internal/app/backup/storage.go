@@ -33,12 +33,12 @@ func (c *Storage) Add(url string) (string, error) {
 		fmt.Println("Error for Add key to storage")
 	}
 	if config.Fileparams.W == 1 {
-		Writer, err := NewWriter(config.Fileparams.String())
+		writer, err := NewWriter(config.Fileparams.String())
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer Writer.Close()
-		err = Writer.WriteData(key, url)
+		defer writer.Close()
+		err = writer.WriteData(key, url)
 		if err != nil {
 			log.Fatal(err)
 		}
