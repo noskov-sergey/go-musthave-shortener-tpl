@@ -31,7 +31,7 @@ func main() {
 
 	err = db.Ping()
 	if err != nil {
-		log.Printf("mysql connection failed!", err)
+		log.Fatal(err, "mysql connection failed!")
 	}
 
 	if errServ := serv.RunServer(params); errServ != nil {

@@ -197,3 +197,5 @@ func TestAPIShorten(t *testing.T) {
 		assert.Equal(t, http.StatusTemporaryRedirect, respAPI.RawResponse.Request.Response.Request.Response.StatusCode, "Response code didn't match expected")
 	})
 }
+
+func TestPingAPI(t *testing.T) {}
