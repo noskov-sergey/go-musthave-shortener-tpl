@@ -77,3 +77,12 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusCreated)
 	res.Write(resp)
 }
+
+func PingAPI(res http.ResponseWriter, req *http.Request) {
+	err := config.DB.Ping()
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
+}
