@@ -29,6 +29,14 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 		log.Fatalln(err)
 	}
 	key := config.BaseURL + shortkey
+
+	if config.DBConf.Active {
+		err = config.DBConf.WriteShorten(shortkey, url)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
 	res.Header().Add("Content-Type", "text/plain")
 	res.Header().Add("Content-Length", strconv.Itoa(len(key)))
 	res.WriteHeader(http.StatusCreated)
@@ -65,6 +73,14 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	if config.DBConf.Active {
+		err = config.DBConf.WriteShorten(shortKey, requestAPI.URI)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
 	responsAPI.Result = config.BaseURL + shortKey
 
 	resp, err := json.Marshal(responsAPI)

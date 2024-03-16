@@ -91,12 +91,20 @@ func (d *DataBase) Set(src string) error {
 func (d *DataBase) CreateNewTable() error {
 	query := `
 			create table if not exists shorten(
-				id integer primary key,
+				id SERIAL PRIMARY KEY,
 				shorten_uri text,
 				original_uri text
 			);
 		`
 
 	_, err := d.Base.Exec(query)
+	return err
+}
+
+func (d *DataBase) WriteShorten(key, uri string) error {
+	_, err := d.Base.Exec("INSERT INTO shorten(shorten_uri, original_uri) VALUES($1, $2)",
+		key,
+		uri,
+	)
 	return err
 }
