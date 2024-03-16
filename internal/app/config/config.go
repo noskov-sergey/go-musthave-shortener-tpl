@@ -10,7 +10,6 @@ import (
 var BaseURL = "http://localhost:8080/"
 var Fileparams = NewFileParams()
 var DBConf = NewDataBase()
-var DB *sql.DB
 
 type Backup struct {
 	BaseFile string
@@ -66,19 +65,57 @@ func (n *NetAddress) Set(src string) error {
 
 type DataBase struct {
 	Config string
+	Base   *sql.DB
+	Active bool
 }
 
 func NewDataBase() *DataBase {
+	var db *sql.DB
 	return &DataBase{
 		Config: "",
+		Base:   db,
+		Active: false,
 	}
 }
 
-func (n *DataBase) String() string {
-	return n.Config
+func (d *DataBase) String() string {
+	return d.Config
 }
 
-func (n *DataBase) Set(src string) error {
-	n.Config = src
+func (d *DataBase) Set(src string) error {
+	d.Config = src
+	d.Active = true
 	return nil
+}
+
+func (d *DataBase) CreateNewTable() error {
+	query := `
+			create table if not exists shorten(
+				id SERIAL PRIMARY KEY,
+				shorten_uri text,
+				original_uri text
+			);
+		`
+
+	_, err := d.Base.Exec(query)
+	return err
+}
+
+func (d *DataBase) WriteShorten(key, uri string) error {
+	_, err := d.Base.Exec("INSERT INTO shorten(shorten_uri, original_uri) VALUES($1, $2)",
+		key,
+		uri,
+	)
+	return err
+}
+
+func (d *DataBase) ReadOriginal(key string) (string, error) {
+	var res string
+
+	row := d.Base.QueryRow("SELECT original_uri FROM shorten WHERE shorten_uri = $1",
+		key,
+	)
+	err := row.Scan(&res)
+
+	return res, err
 }

@@ -11,29 +11,37 @@ import (
 
 func main() {
 	parseFlags(params, config.Fileparams, config.DBConf)
-	Consumer, err := storage.NewReader(config.Fileparams.String())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer Consumer.Close()
-	err = Consumer.ReadFile()
-	if err != nil {
-		log.Fatal(err, "error from main with ReadFile")
+	if !config.DBConf.Active {
+		Consumer, err := storage.NewReader(config.Fileparams.String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer Consumer.Close()
+		err = Consumer.ReadFile()
+		if err != nil {
+			log.Fatal(err, "error from main with ReadFile")
+		}
 	}
 
-	if config.DBConf.String() != "" {
+	if config.DBConf.Active {
 		db, err := sql.Open("pgx", config.DBConf.Config)
 		if err != nil {
 			panic(err)
 		}
 		defer db.Close()
 
-		config.DB = db
+		config.DBConf.Base = db
 
 		err = db.Ping()
 		if err != nil {
 			log.Fatal(err, "mysql connection failed!")
 		}
+
+		err = config.DBConf.CreateNewTable()
+		if err != nil {
+			log.Fatal(err, "Postresql can't create table")
+		}
+
 	}
 
 	if errServ := serv.RunServer(params); errServ != nil {
