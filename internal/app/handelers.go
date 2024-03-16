@@ -46,6 +46,12 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 func Redirect(res http.ResponseWriter, req *http.Request) {
 	key := chi.URLParam(req, "shortlink")
 	url, err := storage.RealStorage.Get(key)
+	if config.DBConf.Active {
+		url, err = config.DBConf.ReadOriginal(key)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return

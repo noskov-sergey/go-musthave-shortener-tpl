@@ -108,3 +108,14 @@ func (d *DataBase) WriteShorten(key, uri string) error {
 	)
 	return err
 }
+
+func (d *DataBase) ReadOriginal(key string) (string, error) {
+	var res string
+
+	row := d.Base.QueryRow("SELECT original_uri FROM shorten WHERE shorten_uri = $1",
+		key,
+	)
+	err := row.Scan(&res)
+
+	return res, err
+}
