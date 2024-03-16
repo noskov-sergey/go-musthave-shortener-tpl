@@ -10,7 +10,6 @@ import (
 var BaseURL = "http://localhost:8080/"
 var Fileparams = NewFileParams()
 var DBConf = NewDataBase()
-var DB *sql.DB
 
 type Backup struct {
 	BaseFile string
@@ -66,19 +65,38 @@ func (n *NetAddress) Set(src string) error {
 
 type DataBase struct {
 	Config string
+	Base   *sql.DB
+	Active bool
 }
 
 func NewDataBase() *DataBase {
+	var db *sql.DB
 	return &DataBase{
 		Config: "",
+		Base:   db,
+		Active: false,
 	}
 }
 
-func (n *DataBase) String() string {
-	return n.Config
+func (d *DataBase) String() string {
+	return d.Config
 }
 
-func (n *DataBase) Set(src string) error {
-	n.Config = src
+func (d *DataBase) Set(src string) error {
+	d.Config = src
+	d.Active = true
 	return nil
+}
+
+func (d *DataBase) CreateNewTable() error {
+	query := `
+			create table if not exists shorten(
+				id integer primary key,
+				shorten_uri text,
+				original_uri text
+			);
+		`
+
+	_, err := d.Base.Exec(query)
+	return err
 }

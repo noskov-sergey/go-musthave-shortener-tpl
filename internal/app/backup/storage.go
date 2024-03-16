@@ -32,7 +32,7 @@ func (c *Storage) Add(url string) (string, error) {
 	if c.links[key] != url {
 		fmt.Println("Error for Add key to storage")
 	}
-	if config.Fileparams.W == 1 {
+	if config.Fileparams.W == 1 && !config.DBConf.Active {
 		writer, err := NewWriter(config.Fileparams.String())
 		if err != nil {
 			log.Fatal(err)

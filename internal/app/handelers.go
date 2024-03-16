@@ -79,7 +79,7 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 }
 
 func PingAPI(res http.ResponseWriter, req *http.Request) {
-	err := config.DB.Ping()
+	err := config.DBConf.Base.Ping()
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		return
