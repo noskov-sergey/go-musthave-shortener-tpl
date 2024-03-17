@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
@@ -107,4 +108,73 @@ func PingAPI(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	res.WriteHeader(http.StatusOK)
+}
+
+func APIbatch(res http.ResponseWriter, req *http.Request) {
+	var requestAPI models.RequestBath
+	var responseAPI models.ResponseBath
+
+	batchList := []models.BatchMapper{}
+
+	dec := json.NewDecoder(bufio.NewReader(req.Body))
+
+	if _, err := dec.Token(); err != nil {
+		panic(err)
+	}
+
+	for dec.More() {
+		var batcher models.BatchMapper
+		err := dec.Decode(&requestAPI)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if requestAPI.OriginalURI != "" && requestAPI.CorrID != "" {
+			shortKey, err := storage.RealStorage.Add(requestAPI.OriginalURI)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			batcher.CorrID = requestAPI.CorrID
+			batcher.OriginalURI = requestAPI.OriginalURI
+			batcher.ShortURI = shortKey
+			batchList = append(batchList, batcher)
+		}
+	}
+
+	if config.DBConf.Active {
+		tx, err := config.DBConf.Base.Begin()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		for _, batch := range batchList {
+			_, err = tx.Exec(
+				"INSERT INTO shorten (shorten_uri, original_uri)"+
+					" VALUES($1, $2)", batch.ShortURI, batch.OriginalURI)
+			if err != nil {
+				tx.Rollback()
+			}
+		}
+		tx.Commit()
+	}
+
+	var resList []models.ResponseBath
+
+	for _, batch := range batchList {
+		responseAPI.ShortURI = config.BaseURL + batch.ShortURI
+		responseAPI.CorrID = batch.CorrID
+		resList = append(resList, responseAPI)
+	}
+
+	resp, err := json.MarshalIndent(resList, "", "    ")
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusCreated)
+	res.Write(resp)
 }
