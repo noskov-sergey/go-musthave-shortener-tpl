@@ -199,3 +199,5 @@ func TestAPIShorten(t *testing.T) {
 }
 
 func TestPingAPI(t *testing.T) {}
+
+func TestAPIbatch(t *testing.T) {}

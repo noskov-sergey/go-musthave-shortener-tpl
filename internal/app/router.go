@@ -15,7 +15,10 @@ func LinkRouter() chi.Router {
 		r.Get("/{shortlink}", Redirect)
 		r.Get("/ping", PingAPI)
 		r.Route("/api", func(r chi.Router) {
-			r.Post("/shorten", APIShorten)
+			r.Route("/shorten", func(r chi.Router) {
+				r.Post("/", APIShorten)
+				r.Post("/batch", APIbatch)
+			})
 		})
 	})
 	return r
