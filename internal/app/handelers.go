@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgerrcode"
 	"go-musthave-shortener-tpl/internal/app/backup"
 	"go-musthave-shortener-tpl/internal/app/config"
 	"go-musthave-shortener-tpl/internal/app/models"
@@ -83,22 +85,38 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 
 	if config.DBConf.Active {
 		err = config.DBConf.WriteShorten(shortKey, requestAPI.URI)
-		if err != nil {
-			log.Fatalln(err)
-		}
 	}
 
-	responsAPI.Result = config.BaseURL + shortKey
-
-	resp, err := json.Marshal(responsAPI)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
+		var ErrAccessDenied = errors.New(pgerrcode.UniqueViolation)
+		if !errors.Is(err, ErrAccessDenied) {
+			shortKey, err = config.DBConf.ReadShorten(requestAPI.URI)
 
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
-	res.Write(resp)
+			responsAPI.Result = config.BaseURL + shortKey
+
+			resp, err := json.Marshal(responsAPI)
+			if err != nil {
+				http.Error(res, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			res.Header().Set("Content-Type", "application/json")
+			res.WriteHeader(http.StatusConflict)
+			res.Write(resp)
+		}
+	} else {
+		responsAPI.Result = config.BaseURL + shortKey
+
+		resp, err := json.Marshal(responsAPI)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(http.StatusCreated)
+		res.Write(resp)
+	}
 }
 
 func PingAPI(res http.ResponseWriter, req *http.Request) {
@@ -152,12 +170,14 @@ func APIbatch(res http.ResponseWriter, req *http.Request) {
 		for _, batch := range batchList {
 			_, err = tx.Exec(
 				"INSERT INTO shorten (shorten_uri, original_uri)"+
-					" VALUES($1, $2)", batch.ShortURI, batch.OriginalURI)
+					" VALUES($1, $2)",
+				batch.ShortURI,
+				batch.OriginalURI)
 			if err != nil {
 				tx.Rollback()
 			}
 		}
-		tx.Commit()
+		err = tx.Commit()
 	}
 
 	var resList []models.ResponseBath
