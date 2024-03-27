@@ -31,19 +31,32 @@ func CreateRedirect(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	key := config.BaseURL + shortkey
 
 	if config.DBConf.Active {
 		err = config.DBConf.WriteShorten(shortkey, url)
-		if err != nil {
-			log.Fatalln(err)
-		}
 	}
 
-	res.Header().Add("Content-Type", "text/plain")
-	res.Header().Add("Content-Length", strconv.Itoa(len(key)))
-	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(key))
+	if err != nil {
+		var ErrAccessDenied = errors.New(pgerrcode.UniqueViolation)
+		if !errors.Is(err, ErrAccessDenied) {
+			shortKey, err := config.DBConf.ReadShorten(url)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			keyN := config.BaseURL + shortKey
+
+			res.Header().Set("Content-Type", "text/plain")
+			res.Header().Add("Content-Length", strconv.Itoa(len(keyN)))
+			res.WriteHeader(http.StatusConflict)
+			res.Write([]byte(keyN))
+		}
+	} else {
+		key := config.BaseURL + shortkey
+		res.Header().Add("Content-Type", "text/plain")
+		res.Header().Add("Content-Length", strconv.Itoa(len(key)))
+		res.WriteHeader(http.StatusCreated)
+		res.Write([]byte(key))
+	}
 }
 
 func Redirect(res http.ResponseWriter, req *http.Request) {
@@ -178,6 +191,9 @@ func APIbatch(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 		err = tx.Commit()
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	var resList []models.ResponseBath

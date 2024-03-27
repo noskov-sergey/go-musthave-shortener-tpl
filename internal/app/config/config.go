@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jackc/pgerrcode"
-	"go-musthave-shortener-tpl/internal/app/logger"
 	"strconv"
 	"strings"
 )
@@ -113,9 +112,6 @@ func (d *DataBase) WriteShorten(key, uri string) error {
 	val, _ := e.RowsAffected()
 	if val == 0 {
 		err = errors.New(pgerrcode.UniqueViolation)
-	}
-	if err != nil {
-		logger.Sugar.Error(err)
 	}
 	return err
 }
