@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"errors"
+	"github.com/jackc/pgerrcode"
 	"strconv"
 	"strings"
 )
@@ -90,10 +91,10 @@ func (d *DataBase) Set(src string) error {
 
 func (d *DataBase) CreateNewTable() error {
 	query := `
-			create table if not exists shorten(
+			CREATE TABLE if NOT EXISTS shorten(
 				id SERIAL PRIMARY KEY,
 				shorten_uri text,
-				original_uri text
+				original_uri text UNIQUE
 			);
 		`
 
@@ -102,10 +103,16 @@ func (d *DataBase) CreateNewTable() error {
 }
 
 func (d *DataBase) WriteShorten(key, uri string) error {
-	_, err := d.Base.Exec("INSERT INTO shorten(shorten_uri, original_uri) VALUES($1, $2)",
-		key,
-		uri,
-	)
+	queryW := `
+			INSERT INTO shorten(shorten_uri, original_uri)
+			    VALUES($1, $2)
+			    ON CONFLICT (original_uri) DO NOTHING;
+		`
+	e, err := d.Base.Exec(queryW, key, uri)
+	val, _ := e.RowsAffected()
+	if val == 0 {
+		err = errors.New(pgerrcode.UniqueViolation)
+	}
 	return err
 }
 
@@ -114,6 +121,17 @@ func (d *DataBase) ReadOriginal(key string) (string, error) {
 
 	row := d.Base.QueryRow("SELECT original_uri FROM shorten WHERE shorten_uri = $1",
 		key,
+	)
+	err := row.Scan(&res)
+
+	return res, err
+}
+
+func (d *DataBase) ReadShorten(uri string) (string, error) {
+	var res string
+
+	row := d.Base.QueryRow("SELECT shorten_uri FROM shorten WHERE original_uri = $1",
+		uri,
 	)
 	err := row.Scan(&res)
 
