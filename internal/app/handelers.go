@@ -104,6 +104,9 @@ func APIShorten(res http.ResponseWriter, req *http.Request) {
 		var ErrAccessDenied = errors.New(pgerrcode.UniqueViolation)
 		if !errors.Is(err, ErrAccessDenied) {
 			shortKey, err = config.DBConf.ReadShorten(requestAPI.URI)
+			if err != nil {
+				log.Fatalln(err)
+			}
 
 			responsAPI.Result = config.BaseURL + shortKey
 
